@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  dashboard:
+    build: .
+    container_name: sales-comparison-dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./bike_sales_numeric_sp.csv:/app/bike_sales_numeric_sp.csv:ro
+      - ./reports:/app/reports
+      - ./cache:/app/.cache
+    environment:
+      - STREAMLIT_SERVER_MAXUPLOADSIZE=200
+      - STREAMLIT_LOGGER_LEVEL=info
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - dashboard-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  dashboard-network:
+    driver: bridge
+
+volumes:
+  reports:
+  cache:
